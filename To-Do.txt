@@ -1,0 +1,3 @@
+Faster movement for x amount of time
+
+Swap weapons with a button press (fire faster, shorter range)
