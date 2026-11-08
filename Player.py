@@ -6,11 +6,10 @@ from direct.task import Task
 import sys
 from SpaceJamClasses import Missile
 from direct.gui.OnscreenImage import OnscreenImage
-from panda3d.core import CollisionHandlerEvent
+from panda3d.core import CollisionHandlerEvent, CollisionTraverser
 from direct.interval.LerpInterval import LerpFunc
 from direct.particles.ParticleEffect import ParticleEffect
 import re
-from panda3d.core import CollisionTraverser
 
 class Player(SphereCollideObject):
     def __init__(self, loader: Loader, taskMgr: TaskManager, accept: Callable[[str, Callable], None], modelPath: str, parentNode: NodePath, nodeName: str,
@@ -30,10 +29,12 @@ class Player(SphereCollideObject):
         self.reloadTime = .25
         self.missileDistance = 4000 #Until missile explodes
         self.missileBay = 1 #Ammo
+        self.flight_speed = 5
+        self.turn_speed = .5
 
         self.cntExplode = 0
         self.explodeIntervals = {}
-        self.traverser = self.traverser
+        self.traverser = CollisionTraverser()
         self.handler = CollisionHandlerEvent()
 
         self.handler.addInPattern("into")
@@ -97,48 +98,48 @@ class Player(SphereCollideObject):
             self.taskMgr.remove("right-turn")
     
     def MoveUpwards(self, task):
-        rate = .5
+        rate = self.turn_speed
         self.modelNode.setP(self.modelNode.getP() - rate)
         return task.cont
 
     def MoveDownwards(self, task):
-        rate = .5
+        rate = self.turn_speed
         self.modelNode.setP(self.modelNode.getP() + rate)
         return task.cont
 
     def MoveForward(self, task):
-        speed = 5
+        speed = self.flight_speed
         trajectory = self.render.getRelativeVector(self.modelNode, Vec3.up())
         trajectory.normalize()
         self.modelNode.setFluidPos(self.modelNode.getPos() + trajectory * speed)
         return task.cont
 
     def MoveBackward(self, task):
-        speed = 5
+        speed = self.flight_speed
         trajectory = self.render.getRelativeVector(self.modelNode, Vec3.up())
         trajectory.normalize()
         self.modelNode.setFluidPos(self.modelNode.getPos() - trajectory * speed)
         return task.cont
 
     def MoveLeftward(self, task):
-        rate = .5
+        rate = self.turn_speed
         self.modelNode.setR(self.modelNode.getR() + rate)
         return task.cont
 
     def MoveRightward(self, task):
-        rate = .5
+        rate = self.turn_speed
         self.modelNode.setR(self.modelNode.getR() - rate)
         return task.cont
     
     def ApplyLeftTurn(self, task):
         # half a degree every frame
-        rate = .5
+        rate = self.turn_speed
         self.modelNode.setH(self.modelNode.getH() - rate)
         return task.cont
 
     def ApplyRightTurn(self, task):
         # half a degree every frame
-        rate = .5
+        rate = self.turn_speed
         self.modelNode.setH(self.modelNode.getH() + rate)
         return task.cont
 
@@ -236,6 +237,24 @@ class Player(SphereCollideObject):
             print("Reload processing...")
             return Task.cont
 
+    def Speed(self):
+        print("Speed boost activated.")
+        self.taskMgr.add(self.SpeedBoost, "speed-boost")
+
+    def SpeedBoost(self, task):
+        if task.time > 5:
+            print("Speed boost deactivated.")
+            self.flight_speed = 5
+            self.turn_speed = .5
+            return Task.done
+        elif task.time <= 5:
+            print("Speed boost processing...")
+            self.flight_speed = 20
+            self.turn_speed = 1
+            return Task.cont
+
+    
+
     def CheckIntervals(self, task):
         for i in Missile.intervals:
             if not Missile.intervals[i].isPlaying():
@@ -257,6 +276,7 @@ class Player(SphereCollideObject):
         # key bindings for ship movement
         self.accept("escape", self.quit)
         self.accept("f", self.Fire)
+        self.accept("rshift", self.Speed)
         self.accept("arrow_up", self.Upwards, [1])
         self.accept("arrow_up-up", self.Upwards, [0])
         self.accept("arrow_down", self.Downwards, [1])
