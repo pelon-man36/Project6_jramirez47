@@ -28,9 +28,9 @@ class Player(SphereCollideObject):
 
         self.reloadTimeSniper = 1
         self.reloadTimeGatling = 0.5
-        self.missileDistanceSniper = 6000 #Until missile explodes
+        self.missileDistanceSniper = 7000 #Until missile explodes
         self.missileBaySniper = 1 #Ammo
-        self.missileDistanceGatling = 1000 #Until missile explodes
+        self.missileDistanceGatling = 3000 #Until missile explodes
         self.missileBayGatling = 10
         self.flight_speed = 5
         self.turn_speed = .5
