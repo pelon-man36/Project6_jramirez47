@@ -8,6 +8,8 @@ from panda3d.core import CollisionTraverser, CollisionHandlerPusher
 class MyApp(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
+        self.cTrav = CollisionTraverser()
+        self.pusher = CollisionHandlerPusher()
         self.setScene()
         fullCycle = 60
 
@@ -23,10 +25,6 @@ class MyApp(ShowBase):
         self.circleY = defensePaths.createCircleY(self)
 
         self.setCamera()
-
-        self.cTrav = CollisionTraverser()
-        self.cTrav.traverse(self.render)
-        self.pusher = CollisionHandlerPusher()
     
         self.pusher.addCollider(self.Player.collisionNode, self.Player.modelNode)
         self.cTrav.addCollider(self.Player.collisionNode, self.pusher)
@@ -34,7 +32,7 @@ class MyApp(ShowBase):
 
 
     def setScene(self):
-        self.Player = player.Player(self.loader, self.taskMgr, self.accept, "./Assets/Spaceships/ship.obj", self.render,
+        self.Player = player.Player(self.loader, self.taskMgr, self.accept, self.cTrav, "./Assets/Spaceships/ship.obj", self.render,
             "Player", "./Assets/Spaceships/Ship_ship_mat_BaseMap.tga", (0, 400, 0), (180, 0, 0), 5)
 
         self.Universe = spaceJamClasses.Universe(self.loader, "./Assets/Universe/Universe.x", self.render,

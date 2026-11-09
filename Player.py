@@ -12,7 +12,7 @@ from direct.particles.ParticleEffect import ParticleEffect
 import re
 
 class Player(SphereCollideObject):
-    def __init__(self, loader: Loader, taskMgr: TaskManager, accept: Callable[[str, Callable], None], modelPath: str, parentNode: NodePath, nodeName: str,
+    def __init__(self, loader: Loader, taskMgr: TaskManager, accept: Callable[[str, Callable], None], cTrav: CollisionTraverser, modelPath: str, parentNode: NodePath, nodeName: str,
             texPath: str, posVec: Vec3, posHpr: Vec3, scaleVec: float):
         super(Player, self).__init__(loader, modelPath, parentNode, nodeName, Vec3(0, 0, 0), 8)
         self.taskMgr = taskMgr
@@ -34,7 +34,7 @@ class Player(SphereCollideObject):
 
         self.cntExplode = 0
         self.explodeIntervals = {}
-        self.traverser = CollisionTraverser()
+        self.traverser = cTrav
         self.handler = CollisionHandlerEvent()
 
         self.handler.addInPattern("into")
