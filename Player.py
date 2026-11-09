@@ -26,9 +26,12 @@ class Player(SphereCollideObject):
         self.render = parentNode
         self.loader = loader
 
-        self.reloadTime = 1
-        self.missileDistance = 6000 #Until missile explodes
-        self.missileBay = 1 #Ammo
+        self.reloadTimeSniper = 1
+        self.reloadTimeGatling = 0.5
+        self.missileDistanceSniper = 6000 #Until missile explodes
+        self.missileBaySniper = 1 #Ammo
+        self.missileDistanceGatling = 1000 #Until missile explodes
+        self.missileBayGatling = 10
         self.flight_speed = 5
         self.turn_speed = .5
         self.weapon_options = 0
@@ -148,14 +151,14 @@ class Player(SphereCollideObject):
         return task.cont
 
     def Sniper(self):
-        if self.missileBay:
-            travRate = self.missileDistance
+        if self.missileBaySniper:
+            travRate = self.missileDistanceSniper
             aim = self.render.getRelativeVector(self.modelNode, Vec3.up()) # Direction spaceship is facing.
             aim.normalize() # Normalizing a vector makes it consistent all the time.
             fireSolution = aim * travRate
             inFront = aim * 150
             travVec = fireSolution + self.modelNode.getPos()
-            self.missileBay -= 1
+            self.missileBaySniper -= 1
             tag = "Missile" + str(Missile.missileCount)
 
             posVec = self.modelNode.getPos() + inFront # Spawn missle infront of the nose of the ship
@@ -168,11 +171,35 @@ class Player(SphereCollideObject):
             Missile.intervals[tag].start()
         else:
             # If not reloading, reload.
-            if not self.taskMgr.hasTaskNamed("reload"):
+            if not self.taskMgr.hasTaskNamed("reload_sniper"):
                 print("Initializing reload...")
                 # Call reload method, no delay
-                self.taskMgr.doMethodLater(0, self.Reload, "reload")
+                self.taskMgr.doMethodLater(0, self.Reload_Sniper, "reload_sniper")
                 return Task.cont
+
+    def Gatling(self):
+        if self.missileBayGatling:
+            travRate = self.missileDistanceGatling
+            aim = self.render.getRelativeVector(self.modelNode, Vec3.up())
+            aim.normalize()
+            fireSolution = aim * travRate
+            inFront = aim * 150
+            travVec = fireSolution + self.modelNode.getPos()
+            self.missileBayGatling -= 1
+            tag = "Missile" + str(Missile.missileCount)
+
+            posVec = self.modelNode.getPos() + inFront
+            currentMissile = Missile(self.loader, "./Assets/Spaceships/Phaser/Phaser/phaser.egg", self.render, tag, posVec, 4.0)
+
+            self.traverser.addCollider(currentMissile.collisionNode, self.handler)
+            Missile.intervals[tag] = currentMissile.modelNode.posInterval(2.0, travVec, startPos = posVec, fluid = 1)
+            Missile.intervals[tag].start()
+        else:
+            if not self.taskMgr.hasTaskNamed("reload_gatling"):
+                print("Preparing reload...")
+                self.taskMgr.doMethodLater(0, self.Reload_Gatling, "reload_gatling")
+                return Task.cont
+
 
     def HandleInto(self, entry):
         fromNode = entry.getFromNodePath().getName()
@@ -230,14 +257,25 @@ class Player(SphereCollideObject):
         self.explodeEffect.setScale(20)
         self.explodeNode = self.render.attachNewNode("ExplosionEffects")
 
-    def Reload(self, task):
-        if task.time > self.reloadTime:
-            self.missileBay += 1
+    def Reload_Sniper(self, task):
+        if task.time > self.reloadTimeSniper:
+            self.missileBaySniper += 1
             print("Reload complete.")
-            if self.missileBay > 1:
-                self.missileBay = 1
+            if self.missileBaySniper > 1:
+                self.missileBaySniper = 1
             return Task.done
-        elif task.time <= self.reloadTime:
+        elif task.time <= self.reloadTimeSniper:
+            print("Reload processing...")
+            return Task.cont
+
+    def Reload_Gatling(self, task):
+        if task.time > self.reloadTimeGatling:
+            self.missileBayGatling += 10
+            print("Reload complete.")
+            if self.missileBayGatling > 10:
+                self.missileBayGatling = 10
+            return Task.done
+        elif task.time <= self.reloadTimeGatling:
             print("Reload processing...")
             return Task.cont
 
@@ -268,7 +306,7 @@ class Player(SphereCollideObject):
         if self.weapon_options == 0:
             self.Sniper()
         elif self.weapon_options == 1:
-            print("Pew Pew Pew! (Its, uh, not yet implemented. Yeah.)")
+            self.Gatling()
 
     def CheckIntervals(self, task):
         for i in Missile.intervals:
