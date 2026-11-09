@@ -35,7 +35,10 @@ class Player(SphereCollideObject):
         self.cntExplode = 0
         self.explodeIntervals = {}
         self.traverser = cTrav
+        self.traverser.traverse(self.render)
         self.handler = CollisionHandlerEvent()
+
+        self.SetParticles()
 
         self.handler.addInPattern("into")
         self.accept("into", self.HandleInto)
@@ -216,15 +219,15 @@ class Player(SphereCollideObject):
         if t == 1.0 and self.explodeEffect:
             self.explodeEffect.disable()
         elif t == 0:
+            print("Start Explosion")
             self.explodeEffect.start(self.explodeNode)
+            print("End Explosion")
 
     def SetParticles(self):
-        self.enableParticleEffects
         self.explodeEffect = ParticleEffect()
-        self.explodeEffect.loadConfig("./Assets/Part-Efx/xpld_efx.ptf")
+        #self.explodeEffect.loadConfig("./Assets/Part-Efx/basic_xpld_efx.ptf")
         self.explodeEffect.setScale(20)
         self.explodeNode = self.render.attachNewNode("ExplosionEffects")
-
 
     def Reload(self, task):
         if task.time > self.reloadTime:

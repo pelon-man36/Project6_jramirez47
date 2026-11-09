@@ -57,7 +57,7 @@ class MyApp(ShowBase):
             "Planet6", "./Assets/Planets/Planet6.png", (2000, 6000, 0), 100)
 
         self.Station = spaceJamClasses.SpaceStation(self.loader, "./Assets/Space_Station/SpaceStation1B/spaceStation.egg",
-            self.render, "SpaceStation", (5000, 4000, 70), 50)
+            self.render, "Space Station", (5000, 4000, 70), 50)
         
 
     def DrawBaseballSeams(self, centralObject, droneName, step, numSeams, radius = 1):
