@@ -26,11 +26,12 @@ class Player(SphereCollideObject):
         self.render = parentNode
         self.loader = loader
 
-        self.reloadTime = .25
-        self.missileDistance = 4000 #Until missile explodes
+        self.reloadTime = 1
+        self.missileDistance = 6000 #Until missile explodes
         self.missileBay = 1 #Ammo
         self.flight_speed = 5
         self.turn_speed = .5
+        self.weapon_options = 0
 
         self.cntExplode = 0
         self.explodeIntervals = {}
@@ -146,7 +147,7 @@ class Player(SphereCollideObject):
         self.modelNode.setH(self.modelNode.getH() + rate)
         return task.cont
 
-    def Fire(self):
+    def Sniper(self):
         if self.missileBay:
             travRate = self.missileDistance
             aim = self.render.getRelativeVector(self.modelNode, Vec3.up()) # Direction spaceship is facing.
@@ -256,7 +257,18 @@ class Player(SphereCollideObject):
             self.turn_speed = 1
             return Task.cont
 
-    
+    def Swap(self, keyDown):
+        if keyDown:
+            self.weapon_options += 1
+            if self.weapon_options > 1:
+                self.weapon_options = 0
+            print("Arsenal " + str(self.weapon_options) + " enabled.")
+
+    def Fire(self):
+        if self.weapon_options == 0:
+            self.Sniper()
+        elif self.weapon_options == 1:
+            print("Pew Pew Pew! (Its, uh, not yet implemented. Yeah.)")
 
     def CheckIntervals(self, task):
         for i in Missile.intervals:
@@ -292,6 +304,8 @@ class Player(SphereCollideObject):
         self.accept("a-up", self.Leftward, [0])
         self.accept("d", self.Rightward, [1])
         self.accept("d-up", self.Rightward, [0])
+        self.accept("m", self.Swap, [1])
+        self.accept("m-up", self.Swap, [0])
         self.accept("arrow_left", self.LeftTurn, [1])
         self.accept("arrow_left-up", self.LeftTurn, [0])
         self.accept("arrow_right", self.RightTurn, [1])
