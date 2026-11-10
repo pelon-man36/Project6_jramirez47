@@ -247,14 +247,12 @@ class Player(SphereCollideObject):
         if t == 1.0 and self.explodeEffect:
             self.explodeEffect.disable()
         elif t == 0:
-            print("Start Explosion")
             self.explodeEffect.start(self.explodeNode)
-            print("End Explosion")
 
     def SetParticles(self):
         self.explodeEffect = ParticleEffect()
-        #self.explodeEffect.loadConfig("./Assets/Part-Efx/basic_xpld_efx.ptf")
-        self.explodeEffect.setScale(20)
+        self.explodeEffect.loadConfig("./Assets/Part-Efx/default_efx.ptf")
+        self.explodeEffect.setScale(70)
         self.explodeNode = self.render.attachNewNode("ExplosionEffects")
 
     def Reload_Sniper(self, task):

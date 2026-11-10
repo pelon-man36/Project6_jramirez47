@@ -87,4 +87,5 @@ class MyApp(ShowBase):
 
 
 app = MyApp()
+base.enableParticles()
 app.run()
